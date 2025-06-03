@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Big O Нотации - Визуализация</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f0f2f5;
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .algorithm-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .algorithm-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .algorithm-title {
+            color: #2c3e50;
+            font-size: 1.5em;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #f0f2f5;
+        }
+
+        .complexity {
+            background: #3498db;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: bold;
+            box-shadow: 0 2px 5px rgba(52, 152, 219, 0.3);
+        }
+
+        .description {
+            color: #666;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+            line-height: 1.6;
+        }
+
+        .visualization {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 12px;
+            margin: 20px 0;
+            min-height: 120px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .array-element {
+            display: inline-block;
+            width: 45px;
+            height: 45px;
+            background: #3498db;
+            color: white;
+            text-align: center;
+            line-height: 45px;
+            margin: 5px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            font-weight: bold;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .array-element.active {
+            background: #e74c3c;
+            transform: scale(1.1);
+            box-shadow: 0 4px 10px rgba(231, 76, 60, 0.3);
+        }
+
+        .array-element.found {
+            background: #2ecc71;
+            box-shadow: 0 4px 10px rgba(46, 204, 113, 0.3);
+        }
+
+        .controls {
+            display: flex;
+            gap: 15px;
+            margin: 20px 0;
+            align-items: center;
+        }
+
+        button {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+            box-shadow: 0 2px 5px rgba(52, 152, 219, 0.3);
+        }
+
+        button:hover {
+            background: #2980b9;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(52, 152, 219, 0.4);
+        }
+
+        input[type="number"] {
+            padding: 10px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+            width: 150px;
+            transition: all 0.3s ease;
+        }
+
+        input[type="number"]:focus {
+            border-color: #3498db;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+        }
+
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            background: #e8f4f8;
+            border-radius: 8px;
+            display: none;
+            font-size: 1.1em;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .result.show {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .code-example {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            font-family: 'Courier New', Courier, monospace;
+            overflow-x: auto;
+            position: relative;
+        }
+
+        .code-example pre {
+            margin: 0;
+            white-space: pre-wrap;
+        }
+
+        .code-example .comment {
+            color: #95a5a6;
+        }
+
+        .code-example .keyword {
+            color: #e74c3c;
+        }
+
+        .code-example .function {
+            color: #3498db;
+        }
+
+        .code-example .string {
+            color: #2ecc71;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .matrix {
+            display: grid;
+            gap: 8px;
+            margin: 15px 0;
+        }
+
+        .matrix-cell {
+            background: #3498db;
+            color: white;
+            padding: 15px;
+            text-align: center;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            font-weight: bold;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .matrix-cell.active {
+            background: #e74c3c;
+            transform: scale(1.1);
+            box-shadow: 0 4px 10px rgba(231, 76, 60, 0.3);
+        }
+
+        .speed-control {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-left: auto;
+        }
+
+        .speed-control label {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .speed-control select {
+            padding: 8px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Визуализация Big O Нотаций</h1>
+        
+        <!-- O(1) -->
+        <div class="algorithm-card">
+            <div class="algorithm-title">
+                <span>Константная сложность</span>
+                <span class="complexity">O(1)</span>
+            </div>
+            <div class="description">
+                Доступ к элементу массива по индексу. Время выполнения не зависит от размера массива.
+            </div>
+            <div class="code-example">
+                <pre>
+<span class="comment">// O(1) - Константная сложность</span>
+<span class="keyword">function</span> <span class="function">constantTimeExample</span>(array, index) {
+    <span class="keyword">return</span> array[index]; <span class="comment">// Просто получаем элемент массива по индексу</span>
+}</pre>
+            </div>
+            <div class="visualization" id="o1-visualization"></div>
+            <div class="controls">
+                <button onclick="runO1Example()">Запустить</button>
+                <div class="speed-control">
+                    <label>Скорость:</label>
+                    <select onchange="setSpeed(this.value)">
+                        <option value="1000">Медленно</option>
+                        <option value="500">Средне</option>
+                        <option value="100">Быстро</option>
+                    </select>
+                </div>
+            </div>
+            <div class="result" id="o1-result"></div>
+        </div>
+
+        <!-- O(log n) -->
+        <div class="algorithm-card">
+            <div class="algorithm-title">
+                <span>Логарифмическая сложность</span>
+                <span class="complexity">O(log n)</span>
+            </div>
+            <div class="description">
+                Бинарный поиск в отсортированном массиве. Каждый шаг уменьшает область поиска вдвое.
+            </div>
+            <div class="code-example">
+                <pre>
+<span class="comment">// O(log n) - Логарифмическая сложность</span>
+<span class="keyword">function</span> <span class="function">binarySearch</span>(array, target) {
+    <span class="keyword">let</span> left = 0;
+    <span class="keyword">let</span> right = array.length - 1;
+
+    <span class="keyword">while</span> (left <= right) {
+        <span class="keyword">const</span> mid = Math.floor((left + right) / 2);
+        
+        <span class="keyword">if</span> (array[mid] === target) {
+            <span class="keyword">return</span> mid;
+        }
+        
+        <span class="keyword">if</span> (array[mid] < target) {
+            left = mid + 1;
+        } <span class="keyword">else</span> {
+            right = mid - 1;
+        }
+    }
+    
+    <span class="keyword">return</span> -1;
+}</pre>
+            </div>
+            <div class="visualization" id="logn-visualization"></div>
+            <div class="controls">
+                <input type="number" id="logn-target" placeholder="Искомое число" min="1" max="10" value="7">
+                <button onclick="runLogNExample()">Запустить</button>
+                <div class="speed-control">
+                    <label>Скорость:</label>
+                    <select onchange="setSpeed(this.value)">
+                        <option value="1000">Медленно</option>
+                        <option value="500">Средне</option>
+                        <option value="100">Быстро</option>
+                    </select>
+                </div>
+            </div>
+            <div class="result" id="logn-result"></div>
+        </div>
+
+        <!-- O(n) -->
+        <div class="algorithm-card">
+            <div class="algorithm-title">
+                <span>Линейная сложность</span>
+                <span class="complexity">O(n)</span>
+            </div>
+            <div class="description">
+                Линейный поиск. Время выполнения пропорционально размеру массива.
+            </div>
+            <div class="code-example">
+                <pre>
+<span class="comment">// O(n) - Линейная сложность</span>
+<span class="keyword">function</span> <span class="function">linearSearch</span>(array, target) {
+    <span class="keyword">for</span> (<span class="keyword">let</span> i = 0; i < array.length; i++) {
+        <span class="keyword">if</span> (array[i] === target) {
+            <span class="keyword">return</span> i;
+        }
+    }
+    <span class="keyword">return</span> -1;
+}</pre>
+            </div>
+            <div class="visualization" id="on-visualization"></div>
+            <div class="controls">
+                <input type="number" id="on-target" placeholder="Искомое число" min="1" max="9" value="8">
+                <button onclick="runONExample()">Запустить</button>
+                <div class="speed-control">
+                    <label>Скорость:</label>
+                    <select onchange="setSpeed(this.value)">
+                        <option value="1000">Медленно</option>
+                        <option value="500">Средне</option>
+                        <option value="100">Быстро</option>
+                    </select>
+                </div>
+            </div>
+            <div class="result" id="on-result"></div>
+        </div>
+
+        <!-- O(n log n) -->
+        <div class="algorithm-card">
+            <div class="algorithm-title">
+                <span>Линейно-логарифмическая сложность</span>
+                <span class="complexity">O(n log n)</span>
+            </div>
+            <div class="description">
+                Сортировка слиянием. Комбинирует преимущества деления массива и слияния.
+            </div>
+            <div class="code-example">
+                <pre>
+<span class="comment">// O(n log n) - Линейно-логарифмическая сложность</span>
+<span class="keyword">function</span> <span class="function">mergeSort</span>(array) {
+    <span class="keyword">if</span> (array.length <= 1) {
+        <span class="keyword">return</span> array;
+    }
+
+    <span class="keyword">const</span> mid = Math.floor(array.length / 2);
+    <span class="keyword">const</span> left = array.slice(0, mid);
+    <span class="keyword">const</span> right = array.slice(mid);
+
+    <span class="keyword">return</span> merge(mergeSort(left), mergeSort(right));
+}
+
+<span class="keyword">function</span> <span class="function">merge</span>(left, right) {
+    <span class="keyword">const</span> result = [];
+    <span class="keyword">let</span> leftIndex = 0;
+    <span class="keyword">let</span> rightIndex = 0;
+
+    <span class="keyword">while</span> (leftIndex < left.length && rightIndex < right.length) {
+        <span class="keyword">if</span> (left[leftIndex] < right[rightIndex]) {
+            result.push(left[leftIndex]);
+            leftIndex++;
+        } <span class="keyword">else</span> {
+            result.push(right[rightIndex]);
+            rightIndex++;
+        }
+    }
+
+    <span class="keyword">return</span> result.concat(left.slice(leftIndex))
+                 .concat(right.slice(rightIndex));
+}</pre>
+            </div>
+            <div class="visualization" id="nlogn-visualization"></div>
+            <div class="controls">
+                <button onclick="runNLogNExample()">Запустить</button>
+                <div class="speed-control">
+                    <label>Скорость:</label>
+                    <select onchange="setSpeed(this.value)">
+                        <option value="1000">Медленно</option>
+                        <option value="500">Средне</option>
+                        <option value="100">Быстро</option>
+                    </select>
+                </div>
+            </div>
+            <div class="result" id="nlogn-result"></div>
+        </div>
+
+        <!-- O(n²) -->
+        <div class="algorithm-card">
+            <div class="algorithm-title">
+                <span>Квадратичная сложность</span>
+                <span class="complexity">O(n²)</span>
+            </div>
+            <div class="description">
+                Сортировка пузырьком. Использует два вложенных цикла.
+            </div>
+            <div class="code-example">
+                <pre>
+<span class="comment">// O(n²) - Квадратичная сложность</span>
+<span class="keyword">function</span> <span class="function">bubbleSort</span>(array) {
+    <span class="keyword">const</span> n = array.length;
+    
+    <span class="keyword">for</span> (<span class="keyword">let</span> i = 0; i < n; i++) {
+        <span class="keyword">for</span> (<span class="keyword">let</span> j = 0; j < n - i - 1; j++) {
+            <span class="keyword">if</span> (array[j] > array[j + 1]) {
+                [array[j], array[j + 1]] = [array[j + 1], array[j]];
+            }
+        }
+    }
+    
+    <span class="keyword">return</span> array;
+}</pre>
+            </div>
+            <div class="visualization" id="n2-visualization"></div>
+            <div class="controls">
+                <button onclick="runN2Example()">Запустить</button>
+                <div class="speed-control">
+                    <label>Скорость:</label>
+                    <select onchange="setSpeed(this.value)">
+                        <option value="1000">Медленно</option>
+                        <option value="500">Средне</option>
+                        <option value="100">Быстро</option>
+                    </select>
+                </div>
+            </div>
+            <div class="result" id="n2-result"></div>
+        </div>
+
+        <!-- O(n³) -->
+        <div class="algorithm-card">
+            <div class="algorithm-title">
+                <span>Кубическая сложность</span>
+                <span class="complexity">O(n³)</span>
+            </div>
+            <div class="description">
+                Умножение матриц. Использует три вложенных цикла.
+            </div>
+            <div class="code-example">
+                <pre>
+<span class="comment">// O(n³) - Кубическая сложность</span>
+<span class="keyword">function</span> <span class="function">matrixMultiplication</span>(matrix1, matrix2) {
+    <span class="keyword">const</span> n = matrix1.length;
+    <span class="keyword">const</span> result = Array(n).fill()
+        .map(() => Array(n).fill(0));
+
+    <span class="keyword">for</span> (<span class="keyword">let</span> i = 0; i < n; i++) {
+        <span class="keyword">for</span> (<span class="keyword">let</span> j = 0; j < n; j++) {
+            <span class="keyword">for</span> (<span class="keyword">let</span> k = 0; k < n; k++) {
+                result[i][j] += matrix1[i][k] * matrix2[k][j];
+            }
+        }
+    }
+
+    <span class="keyword">return</span> result;
+}</pre>
+            </div>
+            <div class="visualization" id="n3-visualization"></div>
+            <div class="controls">
+                <button onclick="runN3Example()">Запустить</button>
+                <div class="speed-control">
+                    <label>Скорость:</label>
+                    <select onchange="setSpeed(this.value)">
+                        <option value="1000">Медленно</option>
+                        <option value="500">Средне</option>
+                        <option value="100">Быстро</option>
+                    </select>
+                </div>
+            </div>
+            <div class="result" id="n3-result"></div>
+        </div>
+
+        <!-- O(n!) -->
+        <div class="algorithm-card">
+            <div class="algorithm-title">
+                <span>Факториальная сложность</span>
+                <span class="complexity">O(n!)</span>
+            </div>
+            <div class="description">
+                Генерация всех возможных перестановок. Время выполнения растет факториально.
+            </div>
+            <div class="code-example">
+                <pre>
+<span class="comment">// O(n!) - Факториальная сложность</span>
+<span class="keyword">function</span> <span class="function">generatePermutations</span>(array) {
+    <span class="keyword">if</span> (array.length <= 1) {
+        <span class="keyword">return</span> [array];
+    }
+
+    <span class="keyword">const</span> result = [];
+    <span class="keyword">for</span> (<span class="keyword">let</span> i = 0; i < array.length; i++) {
+        <span class="keyword">const</span> current = array[i];
+        <span class="keyword">const</span> remaining = array.slice(0, i)
+            .concat(array.slice(i + 1));
+        <span class="keyword">const</span> remainingPerms = generatePermutations(remaining);
+
+        <span class="keyword">for</span> (<span class="keyword">const</span> perm of remainingPerms) {
+            result.push([current, ...perm]);
+        }
+    }
+
+    <span class="keyword">return</span> result;
+}</pre>
+            </div>
+            <div class="visualization" id="nfactorial-visualization"></div>
+            <div class="controls">
+                <button onclick="runNFactorialExample()">Запустить</button>
+                <div class="speed-control">
+                    <label>Скорость:</label>
+                    <select onchange="setSpeed(this.value)">
+                        <option value="1000">Медленно</option>
+                        <option value="500">Средне</option>
+                        <option value="100">Быстро</option>
+                    </select>
+                </div>
+            </div>
+            <div class="result" id="nfactorial-result"></div>
+        </div>
+    </div>
+
+    <script src="big_o_examples.js"></script>
+    <script>
+        let animationSpeed = 1000; // Начальная скорость анимации
+
+        function setSpeed(speed) {
+            animationSpeed = parseInt(speed);
+        }
+
+        // Функции для визуализации
+        function createArrayElements(container, array) {
+            container.innerHTML = '';
+            array.forEach((value, index) => {
+                const element = document.createElement('div');
+                element.className = 'array-element';
+                element.textContent = value;
+                element.dataset.index = index;
+                container.appendChild(element);
+            });
+        }
+
+        function highlightElement(container, index, className = 'active') {
+            const elements = container.getElementsByClassName('array-element');
+            Array.from(elements).forEach(el => el.classList.remove('active', 'found'));
+            if (elements[index]) {
+                elements[index].classList.add(className);
+            }
+        }
+
+        // O(1) Визуализация
+        function runO1Example() {
+            const container = document.getElementById('o1-visualization');
+            const result = document.getElementById('o1-result');
+            const array = [1, 2, 3, 4, 5];
+            
+            createArrayElements(container, array);
+            result.textContent = 'Доступ к элементу массива...';
+            result.classList.add('show');
+
+            setTimeout(() => {
+                highlightElement(container, 2);
+                result.textContent = `Результат: ${array[2]}`;
+            }, animationSpeed);
+        }
+
+        // O(log n) Визуализация
+        async function runLogNExample() {
+            const container = document.getElementById('logn-visualization');
+            const result = document.getElementById('logn-result');
+            const target = parseInt(document.getElementById('logn-target').value) || 7;
+            const array = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+            
+            createArrayElements(container, array);
+            result.textContent = 'Выполняется бинарный поиск...';
+            result.classList.add('show');
+
+            let left = 0;
+            let right = array.length - 1;
+
+            while (left <= right) {
+                const mid = Math.floor((left + right) / 2);
+                highlightElement(container, mid);
+                await new Promise(resolve => setTimeout(resolve, animationSpeed));
+
+                if (array[mid] === target) {
+                    highlightElement(container, mid, 'found');
+                    result.textContent = `Найдено число ${target} на позиции ${mid}`;
+                    return;
+                }
+
+                if (array[mid] < target) {
+                    left = mid + 1;
+                } else {
+                    right = mid - 1;
+                }
+            }
+
+            result.textContent = `Число ${target} не найдено`;
+        }
+
+        // O(n) Визуализация
+        async function runONExample() {
+            const container = document.getElementById('on-visualization');
+            const result = document.getElementById('on-result');
+            const target = parseInt(document.getElementById('on-target').value) || 8;
+            const array = [5, 2, 8, 1, 9];
+            
+            createArrayElements(container, array);
+            result.textContent = 'Выполняется линейный поиск...';
+            result.classList.add('show');
+
+            for (let i = 0; i < array.length; i++) {
+                highlightElement(container, i);
+                await new Promise(resolve => setTimeout(resolve, animationSpeed));
+
+                if (array[i] === target) {
+                    highlightElement(container, i, 'found');
+                    result.textContent = `Найдено число ${target} на позиции ${i}`;
+                    return;
+                }
+            }
+
+            result.textContent = `Число ${target} не найдено`;
+        }
+
+        // O(n log n) Визуализация
+        async function runNLogNExample() {
+            const container = document.getElementById('nlogn-visualization');
+            const result = document.getElementById('nlogn-result');
+            const array = [5, 2, 8, 1, 9];
+            
+            createArrayElements(container, array);
+            result.textContent = 'Выполняется сортировка слиянием...';
+            result.classList.add('show');
+
+            const sortedArray = mergeSort([...array]);
+            
+            for (let i = 0; i < sortedArray.length; i++) {
+                await new Promise(resolve => setTimeout(resolve, animationSpeed / 2));
+                createArrayElements(container, sortedArray);
+                highlightElement(container, i, 'found');
+            }
+
+            result.textContent = `Отсортированный массив: [${sortedArray.join(', ')}]`;
+        }
+
+        // O(n²) Визуализация
+        async function runN2Example() {
+            const container = document.getElementById('n2-visualization');
+            const result = document.getElementById('n2-result');
+            const array = [5, 2, 8, 1, 9];
+            
+            createArrayElements(container, array);
+            result.textContent = 'Выполняется сортировка пузырьком...';
+            result.classList.add('show');
+
+            const n = array.length;
+            for (let i = 0; i < n; i++) {
+                for (let j = 0; j < n - i - 1; j++) {
+                    highlightElement(container, j);
+                    highlightElement(container, j + 1);
+                    await new Promise(resolve => setTimeout(resolve, animationSpeed / 2));
+
+                    if (array[j] > array[j + 1]) {
+                        [array[j], array[j + 1]] = [array[j + 1], array[j]];
+                        createArrayElements(container, array);
+                    }
+                }
+            }
+
+            result.textContent = `Отсортированный массив: [${array.join(', ')}]`;
+        }
+
+        // O(n³) Визуализация
+        function runN3Example() {
+            const container = document.getElementById('n3-visualization');
+            const result = document.getElementById('n3-result');
+            const matrix1 = [[1, 2], [3, 4]];
+            const matrix2 = [[5, 6], [7, 8]];
+            
+            container.innerHTML = `
+                <div class="matrix" style="grid-template-columns: repeat(2, 1fr);">
+                    ${matrix1.map(row => row.map(cell => 
+                        `<div class="matrix-cell">${cell}</div>`
+                    ).join('')).join('')}
+                </div>
+                <div style="text-align: center; margin: 10px;">×</div>
+                <div class="matrix" style="grid-template-columns: repeat(2, 1fr);">
+                    ${matrix2.map(row => row.map(cell => 
+                        `<div class="matrix-cell">${cell}</div>`
+                    ).join('')).join('')}
+                </div>
+            `;
+
+            const resultMatrix = matrixMultiplication(matrix1, matrix2);
+            result.textContent = `Результат: [[${resultMatrix[0].join(', ')}], [${resultMatrix[1].join(', ')}]]`;
+            result.classList.add('show');
+        }
+
+        // O(n!) Визуализация
+        function runNFactorialExample() {
+            const container = document.getElementById('nfactorial-visualization');
+            const result = document.getElementById('nfactorial-result');
+            const array = [1, 2, 3];
+            
+            createArrayElements(container, array);
+            result.textContent = 'Генерация перестановок...';
+            result.classList.add('show');
+
+            const permutations = generatePermutations(array);
+            result.textContent = `Все перестановки: ${permutations.map(p => `[${p.join(', ')}]`).join(', ')}`;
+        }
+
+        // Инициализация
+        document.addEventListener('DOMContentLoaded', () => {
+            const arrays = {
+                'o1-visualization': [1, 2, 3, 4, 5],
+                'logn-visualization': [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+                'on-visualization': [5, 2, 8, 1, 9],
+                'nlogn-visualization': [5, 2, 8, 1, 9],
+                'n2-visualization': [5, 2, 8, 1, 9],
+                'nfactorial-visualization': [1, 2, 3]
+            };
+
+            for (const [id, array] of Object.entries(arrays)) {
+                createArrayElements(document.getElementById(id), array);
+            }
+        });
+    </script>
+</body>
+</html>
